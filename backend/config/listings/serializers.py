@@ -9,3 +9,9 @@ class PropertySerializer(serializers.ModelSerializer):
             'price', 'distress_score', 'source', 
             'created_at', 'updated_at'
         ]
+class FavoriteSerializer(serializers.ModelSerializer):
+    property = PropertySerializer(read_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'user', 'property', 'added_at']
