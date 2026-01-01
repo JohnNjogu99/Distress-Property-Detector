@@ -1,0 +1,22 @@
+<!-- listings/templates/auth/login.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Login</h2>
+
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+    <li>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Login</button>
+</form>
+
+<a href="{% url 'register' %}">Register</a>
+{% endblock %}

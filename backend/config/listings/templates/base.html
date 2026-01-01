@@ -1,0 +1,28 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Distress Property Detector{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>Distress Property Detector</h1>
+        {% if user.is_authenticated %}
+            <p>Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+        <hr>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>&copy; 2026 Distress Property Detector</p>
+    </footer>
+</body>
+</html>

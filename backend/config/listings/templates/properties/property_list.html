@@ -1,0 +1,53 @@
+<!-- listings/templates/properties/property_list.html -->
+{% if user.is_authenticated %}
+  <p>Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
+  <a href="{% url 'favorite-list' %}">My Favorites</a>
+{% else %}
+  <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
+{% endif %}
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<h1>Distress Listings</h1>
+
+<form method="get">
+  <input type="text" name="search" placeholder="Search title/description" value="{{ request.GET.search }}">
+  <input type="text" name="location" placeholder="Location" value="{{ request.GET.location }}">
+  <button type="submit">Filter</button>
+</form>
+
+<table border="1">
+  <tr><th>Title</th><th>Location</th><th>Price</th><th>Score</th><th>Action</th></tr>
+  {% for p in properties %}
+    <tr>
+      <td>{{ p.title }}</td>
+      <td>{{ p.location }}</td>
+      <td>{{ p.price }}</td>
+      <td>
+        {{ p.distress_score }}
+        {% if p.distress_score >= 5 %}
+          (High)
+        {% elif p.distress_score >= 3 %}
+          (Medium)
+        {% else %}
+          (Low)
+        {% endif %}
+      </td>
+      <td>
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'favorite-list' %}">
+            {% csrf_token %}
+            <input type="hidden" name="property_id" value="{{ p.id }}">
+            <button type="submit">Save</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
