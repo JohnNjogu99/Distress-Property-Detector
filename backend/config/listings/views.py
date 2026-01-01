@@ -4,6 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+
 from .models import Property, Favorite, NotificationPreference
 from .forms import PropertyCSVUploadForm
 from .utils import process_csv, calculate_distress_score, get_market_average_price, notify_users
@@ -23,7 +27,7 @@ class PropertyCSVUploadView(APIView):
         return Response({'error': 'Invalid file.'}, status=400)
 
 # -------------------------
-# Property Endpoints
+# Property Endpoints (API)
 # -------------------------
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,7 +85,7 @@ class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
         notify_users(property_obj)
 
 # -------------------------
-# Favorites Endpoints
+# Favorites Endpoints (API)
 # -------------------------
 class FavoriteSerializer(serializers.ModelSerializer):
     property = PropertySerializer(read_only=True)
@@ -114,7 +118,7 @@ class FavoriteDetailView(generics.DestroyAPIView):
         return Favorite.objects.filter(user=self.request.user)
 
 # -------------------------
-# Notification Preferences
+# Notification Preferences (API)
 # -------------------------
 class NotificationPreferenceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -129,3 +133,39 @@ class NotificationPreferenceView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         pref, created = NotificationPreference.objects.get_or_create(user=self.request.user)
         return pref
+
+# -------------------------
+# Frontend Views (UI)
+# -------------------------
+@login_required
+def property_list_ui(request):
+    """Render property list template with all properties."""
+    properties = Property.objects.all().order_by('-created_at')
+    return render(request, "properties/property_list.html", {"properties": properties})
+
+@login_required
+def dashboard_view(request):
+    """Render dashboard with account details, favorites, and notification preferences."""
+    user = request.user
+    favorites = Favorite.objects.filter(user=user).select_related("property")
+    prefs, _ = NotificationPreference.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+        prefs.email_notifications = bool(request.POST.get("email_notifications"))
+        prefs.sms_notifications = bool(request.POST.get("sms_notifications"))
+        prefs.save()
+        return redirect("dashboard")
+
+    return render(request, "auth/dashboard.html", {
+        "user": user,
+        "favorites": favorites,
+        "prefs": prefs,
+    })
+
+@require_POST
+@login_required
+def remove_favorite(request):
+    """Allow users to remove a favorite from dashboard."""
+    property_id = request.POST.get("property_id")
+    Favorite.objects.filter(user=request.user, property_id=property_id).delete()
+    return redirect("dashboard")

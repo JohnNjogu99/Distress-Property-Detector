@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>My Dashboard</h2>
+
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+    <li>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<hr>
+
+<h3>Account Details</h3>
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Date Joined:</strong> {{ user.date_joined }}</p>
+
+<hr>
+
+<h3>My Favorites</h3>
+
+{% if favorites %}
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Title</th>
+    <th>Location</th>
+    <th>Price</th>
+    <th>Distress Score</th>
+    <th>Action</th>
+  </tr>
+
+  {% for fav in favorites %}
+  <tr>
+    <td>{{ fav.property.title }}</td>
+    <td>{{ fav.property.location }}</td>
+    <td>{{ fav.property.price }}</td>
+    <td>{{ fav.property.distress_score }}</td>
+    <td>
+      <form method="post" action="{% url 'remove-favorite' fav.id %}">
+        {% csrf_token %}
+        <button type="submit">Remove</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No favorites yet.</p>
+{% endif %}
+
+<hr>
+
+<h3>Notification Preferences</h3>
+
+<form method="post">
+  {% csrf_token %}
+
+  <label>
+    <input type="checkbox" name="email_notifications"
+           {% if prefs.email_notifications %}checked{% endif %}>
+    Email Notifications
+  </label>
+  <br>
+
+  <label>
+    <input type="checkbox" name="sms_notifications"
+           {% if prefs.sms_notifications %}checked{% endif %}>
+    SMS Notifications
+  </label>
+  <br><br>
+
+  <button type="submit">Update Preferences</button>
+</form>
+
+{% endblock %}

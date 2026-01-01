@@ -1,27 +1,22 @@
 # listings/urls.py
-from django.urls import path, include
+from django.urls import path
 from .views import (
     PropertyListView, PropertyDetailView,
-    PropertyCSVUploadView,
     FavoriteListView, FavoriteDetailView,
-    NotificationPreferenceView
+    NotificationPreferenceView,
+    PropertyCSVUploadView,
+    property_list_ui, dashboard_view, remove_favorite
 )
-from .views_frontend import property_list_view
 
 urlpatterns = [
-    # Frontend UI
-    path('', property_list_view, name='property-list-ui'),
+    path("api/properties/", PropertyListView.as_view(), name="property-list"),
+    path("api/properties/<int:pk>/", PropertyDetailView.as_view(), name="property-detail"),
+    path("api/favorites/", FavoriteListView.as_view(), name="favorite-list"),
+    path("api/favorites/<int:pk>/", FavoriteDetailView.as_view(), name="favorite-detail"),
+    path("api/preferences/", NotificationPreferenceView.as_view(), name="notification-preferences"),
+    path("api/upload/", PropertyCSVUploadView.as_view(), name="property-upload"),
 
-    # API Endpoints
-    path('api/properties/', PropertyListView.as_view(), name='property-list'),
-    path('api/properties/<int:pk>/', PropertyDetailView.as_view(), name='property-detail'),
-    path('api/properties/upload/', PropertyCSVUploadView.as_view(), name='property-upload'),
-
-    path('api/favorites/', FavoriteListView.as_view(), name='favorite-list'),
-    path('api/favorites/<int:pk>/', FavoriteDetailView.as_view(), name='favorite-detail'),
-
-    path('api/notifications/', NotificationPreferenceView.as_view(), name='notifications'),
-
-    # User auth
-    path('api/auth/', include('users.urls')),
+    path("properties/", property_list_ui, name="property-list-ui"),
+    path("dashboard/", dashboard_view, name="dashboard"),
+    path("remove-favorite/", remove_favorite, name="remove-favorite"),
 ]
