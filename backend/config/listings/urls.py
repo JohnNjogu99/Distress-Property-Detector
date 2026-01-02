@@ -1,22 +1,42 @@
-# listings/urls.py
 from django.urls import path
+from . import views
 from .views import (
-    PropertyListView, PropertyDetailView,
-    FavoriteListView, FavoriteDetailView,
+    # API views
+    PropertyListView,
+    PropertyDetailView,
+    FavoriteListView,
+    FavoriteDetailView,
     NotificationPreferenceView,
     PropertyCSVUploadView,
-    property_list_ui, dashboard_view, remove_favorite
+
+    # UI views
+    property_list_ui,
+    dashboard_view,
+    add_favorite,
+    remove_favorite,
 )
 
 urlpatterns = [
-    path("api/properties/", PropertyListView.as_view(), name="property-list"),
-    path("api/properties/<int:pk>/", PropertyDetailView.as_view(), name="property-detail"),
-    path("api/favorites/", FavoriteListView.as_view(), name="favorite-list"),
-    path("api/favorites/<int:pk>/", FavoriteDetailView.as_view(), name="favorite-detail"),
-    path("api/preferences/", NotificationPreferenceView.as_view(), name="notification-preferences"),
-    path("api/upload/", PropertyCSVUploadView.as_view(), name="property-upload"),
 
+    # -----------------------
+    # UI ROUTES
+    # -----------------------
     path("properties/", property_list_ui, name="property-list-ui"),
     path("dashboard/", dashboard_view, name="dashboard"),
-    path("remove-favorite/", remove_favorite, name="remove-favorite"),
+    path("favorites/add/<int:property_id>/", add_favorite, name="add-favorite"),
+    path("favorites/remove/<int:favorite_id>/", remove_favorite, name="remove-favorite"),
+
+    # -----------------------
+    # API ROUTES
+    # -----------------------
+    path("api/properties/", PropertyListView.as_view(), name="api-property-list"),
+    path("api/properties/<int:pk>/", PropertyDetailView.as_view(), name="api-property-detail"),
+
+    path("api/favorites/", FavoriteListView.as_view(), name="api-favorite-list"),
+    path("api/favorites/<int:pk>/", FavoriteDetailView.as_view(), name="api-favorite-detail"),
+
+    path("api/notifications/", NotificationPreferenceView.as_view(), name="api-notifications"),
+
+    path("api/upload-csv/", PropertyCSVUploadView.as_view(), name="api-upload-csv"),
+    path("properties/", views.property_list_ui, name="property-list"),
 ]

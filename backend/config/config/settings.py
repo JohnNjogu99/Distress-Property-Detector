@@ -88,7 +88,9 @@ DATABASES = {
 # STATIC FILES
 # ------------------------------------------------------------------
 STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
+    BASE_DIR / 'static',
     BASE_DIR / 'frontend' / 'static',   # backend/frontend/static
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # for collectstatic in production

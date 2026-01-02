@@ -1,16 +1,36 @@
-# listings/views.py
 from rest_framework import generics, serializers, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
+from django.contrib import messages
 
 from .models import Property, Favorite, NotificationPreference
 from .forms import PropertyCSVUploadForm
 from .utils import process_csv, calculate_distress_score, get_market_average_price, notify_users
+
+# -------------------------
+# Favorites (UI)
+# -------------------------
+@login_required
+def add_favorite(request, property_id):
+    """Add a property to favorites."""
+    property_obj = get_object_or_404(Property, pk=property_id)
+    Favorite.objects.get_or_create(user=request.user, property=property_obj)
+    messages.success(request, f"Saved '{property_obj.title}' to favorites!")
+    return redirect("property-list")
+
+@require_POST
+@login_required
+def remove_favorite(request, favorite_id):
+    """Remove a favorite by its ID."""
+    fav = get_object_or_404(Favorite, pk=favorite_id, user=request.user)
+    fav.delete()
+    messages.success(request, "Favorite removed successfully.")
+    return redirect("dashboard")
 
 # -------------------------
 # CSV Upload (Admin Only)
@@ -161,11 +181,3 @@ def dashboard_view(request):
         "favorites": favorites,
         "prefs": prefs,
     })
-
-@require_POST
-@login_required
-def remove_favorite(request):
-    """Allow users to remove a favorite from dashboard."""
-    property_id = request.POST.get("property_id")
-    Favorite.objects.filter(user=request.user, property_id=property_id).delete()
-    return redirect("dashboard")

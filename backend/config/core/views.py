@@ -1,4 +1,6 @@
 from django.shortcuts import render
+#from properties.models import Property
+
 def home_view(request): 
     return render(request, "home.html")
 
@@ -19,3 +21,14 @@ def property_detail(request, id):
 
 def favorites(request):
     return render(request, 'properties/favorites.html')
+
+def property_list_view(request):
+    query = request.GET.get("query", "")
+    location = request.GET.get("location", "")
+    properties = Property.objects.all()
+    if query:
+        properties = properties.filter(description__icontains=query)
+    if location:
+        properties = properties.filter(location__icontains=location)
+    return render(request, "property_list.html", {"properties": properties})
+

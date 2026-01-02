@@ -1,78 +1,84 @@
 {% extends "base.html" %}
 
+{% block title %}Property Listings{% endblock %}
+
 {% block content %}
 
-{% if user.is_authenticated %}
-  <p>
-    <a href="{% url 'dashboard' %}">My Dashboard</a>
-  </p>
-{% else %}
-  <a href="{% url 'login' %}">Login</a> |
-  <a href="{% url 'register' %}">Register</a>
-{% endif %}
+<h2>Distress Listings</h2>
 
-{% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
-
-<h1>Distress Listings</h1>
-
-<form method="get">
-  <input
-    type="text"
-    name="search"
-    placeholder="Search title or description"
-    value="{{ request.GET.search }}"
-  >
-  <input
-    type="text"
-    name="location"
-    placeholder="Location"
-    value="{{ request.GET.location }}"
-  >
-  <button type="submit">Filter</button>
+<form method="get" class="search-bar">
+    <input
+        type="text"
+        name="search"
+        placeholder="Search title or description"
+        value="{{ request.GET.search }}"
+    >
+    <input
+        type="text"
+        name="location"
+        placeholder="Location"
+        value="{{ request.GET.location }}"
+    >
+    <button type="submit">Filter</button>
+    <a href="{{ request.path }}">Clear</a>
 </form>
 
-<table border="1" cellpadding="6">
-  <tr>
-    <th>Title</th>
-    <th>Location</th>
-    <th>Price</th>
-    <th>Score</th>
-    <th>Action</th>
-  </tr>
-
-  {% for p in properties %}
-  <tr>
-    <td>{{ p.title }}</td>
-    <td>{{ p.location }}</td>
-    <td>{{ p.price }}</td>
-    <td>
-      {{ p.distress_score }}
-      {% if p.distress_score >= 5 %}
-        <strong>(High)</strong>
-      {% elif p.distress_score >= 3 %}
-        (Medium)
-      {% else %}
-        (Low)
-      {% endif %}
-    </td>
-    <td>
-      {% if user.is_authenticated %}
-        <form method="post" action="{% url 'add-favorite' p.id %}">
-          {% csrf_token %}
-          <button type="submit">Save</button>
-        </form>
-      {% else %}
-        <em>Login to save</em>
-      {% endif %}
-    </td>
-  </tr>
-  {% endfor %}
+{% if properties %}
+<table border="1" width="100%" cellpadding="6">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Score</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in properties %}
+        <tr>
+            <td>{{ p.title }}</td>
+            <td>{{ p.location }}</td>
+            <td>{{ p.price|floatformat:0 }}</td>
+            <td>
+                {{ p.distress_score }}
+                {% if p.distress_score >= 5 %}
+                    <strong>(High)</strong>
+                {% elif p.distress_score >= 3 %}
+                    (Medium)
+                {% else %}
+                    (Low)
+                {% endif %}
+            </td>
+            <td>
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'add-favorite' p.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Save</button>
+                    </form>
+                {% else %}
+                    <em>Login to save</em>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+{% if is_paginated %}
+<div style="margin-top: 10px;">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">« Previous</a>
+    {% endif %}
+    <span> Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} </span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next »</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<p>No properties found. Try adjusting your filters.</p>
+{% endif %}
 
 {% endblock %}
