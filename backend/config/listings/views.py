@@ -1,5 +1,3 @@
-# listings/views.py
-
 # =========================
 # Django imports
 # =========================
@@ -83,15 +81,39 @@ def remove_favorite(request, favorite_id):
 
 
 # ======================================================
-# UI: Property List
+# UI: Property List (with inline Add Property form)
 # ======================================================
 @login_required
 def property_list_ui(request):
     properties = Property.objects.all().order_by("-created_at")
+
+    if request.method == "POST":
+        form = PropertyForm(request.POST)
+        if form.is_valid():
+            property_obj = form.save(commit=False)
+
+            market_avg = get_market_average_price(property_obj.location)
+            property_obj.distress_score = calculate_distress_score(
+                price=property_obj.price,
+                description=property_obj.description,
+                market_average=market_avg,
+            )
+            property_obj.source = "manual"
+            property_obj.save()
+
+            notify_users(property_obj)
+            messages.success(request, "Property added successfully.")
+            return redirect("property-list")
+    else:
+        form = PropertyForm()
+
     return render(
         request,
         "properties/property_list.html",
-        {"properties": properties},
+        {
+            "properties": properties,
+            "form": form,
+        },
     )
 
 

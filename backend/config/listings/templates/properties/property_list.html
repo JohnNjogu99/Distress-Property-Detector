@@ -4,16 +4,10 @@
 
 {% block content %}
 
-<!-- ============================= -->
-<!-- Add Property Form -->
-<!-- ============================= -->
-<h2>Add Distress Property</h2>
-
-<form method="post" style="margin-bottom: 30px;">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Property</button>
-</form>
+<!-- Add New Property Link -->
+<p>
+    <a href="{% url 'add-property' %}">+ Add New Property</a>
+</p>
 
 <hr>
 
