@@ -4,9 +4,25 @@
 
 {% block content %}
 
+<!-- ============================= -->
+<!-- Add Property Form -->
+<!-- ============================= -->
+<h2>Add Distress Property</h2>
+
+<form method="post" style="margin-bottom: 30px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Property</button>
+</form>
+
+<hr>
+
+<!-- ============================= -->
+<!-- Property Listings -->
+<!-- ============================= -->
 <h2>Distress Listings</h2>
 
-<form method="get" class="search-bar">
+<form method="get" class="search-bar" style="margin-bottom: 20px;">
     <input
         type="text"
         name="search"
